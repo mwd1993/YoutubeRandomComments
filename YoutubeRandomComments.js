@@ -112,8 +112,6 @@
         return commentComponent;
     }
 
-
-
     // Extract string data from provided element
     function commentGet(commentElement,get_what)
     {
