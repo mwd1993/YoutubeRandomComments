@@ -201,7 +201,7 @@
         nameComponent.display = "block";
     }
 
-    // Min max between to integers
+    // Min max between two integers
     function getRandomInt(min, max)
     {
         min = Math.ceil(min);
