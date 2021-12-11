@@ -2,7 +2,7 @@
 // @name         YoutubeRandomComments
 // @namespace    http://tampermonkey.net/
 // @version      0.1
-// @description  Randomly shows a comment underneath the video!
+// @description  Randomly shows a comment overlayed onto the current Youtube video!
 // @author       Marc github.com/mwd1993
 // @match        http://*/*
 // @match        https://www.youtube.com/watch?v=*
