@@ -6,46 +6,63 @@
 // @author       Marc github.com/mwd1993
 // @match        http://*/*
 // @match        https://www.youtube.com/watch?v=*
+// @match        http://www.youtube.com/watch?v=*
+// @match        youtube.com/watch?v=*
 // @icon         data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==
+// @require      http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js
+// @require      https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @grant        none
 // ==/UserScript==
 
 (function() {
     'use strict';
 
-    // Run the program in 5 seconds..
-    // It won't show comments until the user
-    // scrolls down and loads some...
-    // is there a non hacky way to get comments
-    // to show before a user scrolls down?
-    window.addEventListener('load', function() {
-
-        setTimeout(function(){
-            setInterval(displayRandomComment, randomCommentTimeoutMS);
-        }, 5000);
-
-        setTimeout(function(){
-            getNameComponent();
-            getLikesComponent();
-            getCommentComponent();
-        }, 5000);
-
-    }, false);
-
     // Initialize variables
-    var randomCommentTimeoutMS = 15000;
     // ------------------------------------------------------------------------------------
     // ---------------- youtube selectors, which obviously can and will change ------------
     // ------------------------------------------------------------------------------------
     var videoSelector = "div#player-container-inner.style-scope.ytd-watch-flexy";
     var videoSelector2 = "div.html5-video-container";
     var commentSelector = "div#main.style-scope.ytd-comment-renderer";
+    var commentLiveSelector1 = "span#message[dir='auto']";//"[dir='auto']";
+    var commentLiveSelector2 = "[class='style-scope yt-live-chat-text-message-renderer']";
+    var commentLoadedSelector = "div#icon-label.style-scope.yt-dropdown-menu";
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     var commentComponentSelector = "p#ccs";
     var nameComponentSelector = "p#ncs";
     var likesComponentSelector = "p#lcs";
+    var randomCommentTimeoutMS = 15000;
+    var waitForKeyElementLoaded = false;
     var nameComponent, commentComponent, likesComponent;
+
+    waitForKeyElements(commentLoadedSelector,keyElementFunction);
+    var commentLoadedInterval = setInterval(function() {waitingForCommentsToLoad();}, 1500);
+
+    function waitingForCommentsToLoad()
+    {
+        var el = document.querySelectorAll(commentLoadedSelector);
+        if(el)
+        {
+            clearInterval(commentLoadedInterval);
+        }
+    }
+
+    function keyElementFunction()
+    {
+        if(!waitForKeyElementLoaded)
+        {
+            getNameComponent();
+            getLikesComponent();
+            getCommentComponent();
+            var method = displayRandomComment;
+            setInterval(method, randomCommentTimeoutMS);
+            method();
+            showComponents();
+            hideComponents();
+            waitForKeyElementLoaded = true;
+        }
+    }
 
     // Name component get/initializer
     function getNameComponent()
@@ -99,9 +116,9 @@
             pTag.innerText = "comment";
             pTag.style.color = "white";
             pTag.style.zIndex = "2000";
-            pTag.style.fontSize = "16px";
+            pTag.style.fontSize = "12px";
             pTag.style.padding = "4px";
-            pTag.style.width = "50%";
+            pTag.style.width = "38%";
             pTag.style.paddingLeft = "30px";
             pTag.style.position = "absolute";
             pTag.style.top = "64px";
@@ -130,7 +147,12 @@
             });
             return comment;
         }
-        else if(get_what == "likes") return textSplit[textSplit.length-2];
+        else if(get_what == "likes")
+        {
+            var split = textSplit[textSplit.length-2];
+            if(split == commentGet(commentElement,"comment")) return 0;
+            return split;
+        }
     }
 
     // Get a random comment and display it on the video inner container
@@ -157,6 +179,28 @@
         }
     }
 
+    function hideComponents()
+    {
+        likesComponent = document.querySelector(likesComponentSelector);
+        commentComponent = document.querySelector(commentComponentSelector);
+        nameComponent = document.querySelector(nameComponentSelector);
+
+        likesComponent.display = "none";
+        commentComponent.display = "none";
+        nameComponent.display = "none";
+    }
+
+    function showComponents()
+    {
+        likesComponent = document.querySelector(likesComponentSelector);
+        commentComponent = document.querySelector(commentComponentSelector);
+        nameComponent = document.querySelector(nameComponentSelector);
+
+        likesComponent.display = "block";
+        commentComponent.display = "block";
+        nameComponent.display = "block";
+    }
+
     // Min max between to integers
     function getRandomInt(min, max)
     {
@@ -170,4 +214,5 @@
     {
         console.log(string);
     }
+
 })();
